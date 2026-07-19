@@ -45,18 +45,5 @@ def rho_put(S, K, T, r, sigma):
     return(np.round((-K*T* np.exp(-1*r*T) * norm.cdf(-d2)),4))
 
 
-# print(theta_call(49,50,0.3846,0.05,0.20))
-# print(theta_call(100,100,1.0,0.05,0.20))
-# print(theta_put(49,50,0.3846,0.05,0.20))
-# print(theta_put(100,100,1.0,0.05,0.20))
-# print(gamma(49,50,0.3846,0.05,0.20))
-# print(gamma(100,100,1.0,0.05,0.20))
-# print(delta_call(100,100,1.0,0.05,0.20))
-# print(delta_put(100,100,1.0,0.05,0.20))
-# print(vega(49,50,0.3846,0.05,0.20))
-# print(rho_call(49,50,0.3846,0.05,0.20))
-# print(rho_put(49,50,0.3846,0.05,0.20))
 
-# print(rho_call(100,100,1.0,0.05,0.20))
-# print(rho_put(100,100,1.0,0.05,0.20))
 
