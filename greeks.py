@@ -50,9 +50,9 @@ def greeksFunc(S, K, T, r, sigma):
     "delta_put": delta_put(S, K, T, r, sigma),
     "gamma": gamma(S, K, T, r, sigma),
     "theta_call": theta_call(S, K, T, r, sigma)/365,
-    "theta_put": theta_call(S, K, T, r, sigma)/365,
-    "vega": vega(S, K, T, r, sigma),
-    "rho_call": rho_call(S, K, T, r, sigma),
-    "rho_put": rho_put(S, K, T, r, sigma)})
+    "theta_put": theta_put(S, K, T, r, sigma)/365,
+    "vega": vega(S, K, T, r, sigma)/100,
+    "rho_call": rho_call(S, K, T, r, sigma)/100,
+    "rho_put": rho_put(S, K, T, r, sigma)/100})
 
 

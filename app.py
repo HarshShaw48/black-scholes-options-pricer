@@ -160,6 +160,7 @@ optionPriceCol1, optionPriceCol2 = st.columns(2, gap="small")
 
 with optionPriceCol1:
     st.markdown(f"""
+    <br>
     <div class="metric-card">
         <div class="metric-title">Call Option Price</div>
         <div class="metric-value">
@@ -171,6 +172,7 @@ with optionPriceCol1:
 
 with optionPriceCol2:
     st.markdown(f"""
+    <br>
     <div class="metric-card">
         <div class="metric-title">Put Option Price</div>
         <div class="metric-value">
@@ -193,6 +195,7 @@ deltaCallColumn, deltaPutColumn, gammaColumn = st.columns(3, gap="small")
 
 with deltaCallColumn:
     st.markdown(f"""
+        <br>
         <div class="metric-card">
         <div class="metric-title">Delta Call</div>
         <div class="metric-value">
@@ -203,6 +206,7 @@ with deltaCallColumn:
 
 with deltaPutColumn:
     st.markdown(f"""
+        <br>
         <div class="metric-card">
         <div class="metric-title">Delta Put</div>
         <div class="metric-value">
@@ -213,10 +217,11 @@ with deltaPutColumn:
 
 with gammaColumn:
     st.markdown(f"""
+        <br>
         <div class="metric-card">
         <div class="metric-title">Gamma</div>
         <div class="metric-value">
-        {greeksDict["gamma"]:.2f}
+        {greeksDict["gamma"]:.4f}
         </div>
         </div>
     """, unsafe_allow_html=True)
