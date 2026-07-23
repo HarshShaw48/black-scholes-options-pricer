@@ -26,7 +26,6 @@ def theta_put(S, K, T, r, sigma):
     d2 = d1 - (sigma * np.sqrt(T))
     term1= -(S*norm.pdf(d1)*sigma) / (2*np.sqrt(T))
     term2= r*K* np.exp(-1*r*T)* norm.cdf(-d2)
-    print(term1, term2)
     return(term1+term2)
 
 def vega(S, K, T, r, sigma):

@@ -3,6 +3,7 @@ from datetime import date, timedelta
 import yfinance as yf
 from black_scholes import option_pricer
 from greeks import *
+import plotly.graph_objects as go
 
 
 #FONT AND SIDEBAR ELEMENTS AND THEME
@@ -115,7 +116,7 @@ with st.sidebar:
         else:
             S = st.number_input ("Current Stock Price", value=100.00, min_value=0.00, step=0.5, format="%.2f")
 
-    K = st.number_input("Strike Price", value=100.00, min_value=1.00, step=0.50, format="%.2f")
+    K = st.number_input("Strike Price", value=(S//100)*100, min_value=1.00, step=0.50, format="%.2f")
 
     # T = st.date_input("Time to Expiry", value=date.today() + timedelta(days=7))
     timeOption = st.segmented_control("Time", ["Expiry Date", "Time to Expiry"], required=True, default="Expiry Date")
@@ -136,12 +137,12 @@ with st.sidebar:
 
 #FUNCTION CALLS
 
-call_price, put_price = option_pricer(S, K, T, r, sigma)
+callPriceValue, putPriceValue = option_pricer(S, K, T, r, sigma)
 
 greeksDict= greeksFunc(S, K, T, r, sigma)
 
-#DISPLAYING OUTPUT
 
+#DISPLAYING OPTION PRICES
 
 st.markdown("""
     <br>
@@ -164,7 +165,7 @@ with optionPriceCol1:
     <div class="metric-card">
         <div class="metric-title">Call Option Price</div>
         <div class="metric-value">
-        {call_price:.2f}
+        {callPriceValue:.2f}
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -176,10 +177,13 @@ with optionPriceCol2:
     <div class="metric-card">
         <div class="metric-title">Put Option Price</div>
         <div class="metric-value">
-            {put_price:.2f}
+            {putPriceValue:.2f}
         </div>
     </div>
 """, unsafe_allow_html=True)
+
+
+#DISPLAYING OPTION GREEK
 
 st.markdown("""
     <br>
@@ -283,5 +287,186 @@ with rhoPut:
         {greeksDict["rho_put"]:.2f}
         </div>
         </div>
+        <br>
     """, unsafe_allow_html=True)
 
+# PAYOFF VISUALISER
+st.markdown("""
+<h4 style="
+    font-size: 1.25rem;
+    color: #A9B4C2;
+    margin: 0.2rem 0 0.6rem 0;
+    line-height: 1.2;
+">Strategy Selector</h4>
+
+<p style="
+    font-size: 1.0rem;
+    color: #A9B4C2;
+    margin: 0;
+    line-height: 1.5;
+">Select an options strategy to visualize its payoff profile at expiration.</p>
+<br>
+""", unsafe_allow_html=True)
+
+
+def createPayoffGraph (stockTimeT, payoff, stratergyName, strikes=None, breakEven=None):
+    payoffGraph = go.Figure()
+    payoffGraph.add_trace(
+            go.Scatter(
+                x= stockTimeT, y= payoff, mode= "lines", name= stratergyName, line= dict(color="#FF4DA7", width=3),
+                hovertemplate=
+                    "<b>Underlying Price</b>: %{x:.2f}<br>"
+                    "<b>P/L</b>: %{y:.2f}<extra></extra>"
+            )
+        )
+    
+    payoffGraph.add_hline( y=0, line_dash="dash", line_color="#A9B4C2", opacity=0.7
+        )
+    
+    # if strikes is not None:
+    #     for i, strike in enumerate(strikes, start=1):
+    #         payoffGraph.add_vline(
+    #             x=strike,
+    #             line_dash="dot",
+    #             line_color="#4ADE80",
+    #             annotation_text=f"Strike {i}",
+    #             annotation_position="top"
+    #         )
+
+    y_min = payoff.min()
+    y_max = payoff.max()
+    padding = 0.05 * (y_max - y_min)
+    if strikes is not None:
+        for i, strike in enumerate(strikes, start=1):
+            payoffGraph.add_trace(
+                go.Scatter(
+                    x=[strike, strike],
+                    y=[y_min - padding, y_max + padding],
+                    mode="lines",
+                    line=dict(color="#4ADE80", dash="dot"),
+                    name=f"Strike {i}",
+                    hovertemplate=f"<b>Strike {i}</b>: {strike:.2f}<extra></extra>"
+                )
+            )
+    
+    x_min = stockTimeT.min()
+    x_max = stockTimeT.max()
+
+    # if breakEven is not None and x_min <= breakEven <= x_max:
+    #     payoffGraph.add_vline(
+    #         x=breakEven,
+    #         line_dash="dash",
+    #         line_color="#FFD166",
+    #         annotation_text="Break-even",
+    #         annotation_position="top"
+    #     )
+
+    if breakEven is not None and x_min <= breakEven <= x_max:
+        payoffGraph.add_trace(
+            go.Scatter(
+                x=[breakEven, breakEven],
+                y=[y_min - padding, y_max + padding],
+                mode="lines",
+                line=dict(color="#FFD166", dash="dash"),
+                name="Break-even",
+                hovertemplate=f"<b>Break-even</b>: {breakEven:.2f}<extra></extra>"
+            )
+        )
+    
+    payoffGraph.update_layout(
+        title= stratergyName + " Payoff at Expiration",
+        xaxis_title="Underlying Price at Expiration",
+        yaxis_title="Profit / Loss",
+        template="plotly_dark",
+    
+        paper_bgcolor="#0B1220",
+        plot_bgcolor="#0B1220",
+    
+        font=dict(
+            family="Inter",
+            size=14,
+            color="#F7F3EE"
+        ),
+
+        legend=dict(
+            bgcolor="rgba(0,0,0,0)"
+        ),
+
+        hovermode="x unified",
+
+        margin=dict(
+            l=40,
+            r=40,
+            t=60,
+            b=40
+        )
+    )
+    
+    payoffGraph.update_xaxes(
+        showgrid=True,
+        gridcolor="#263245",
+        zeroline=False
+    )
+    
+    payoffGraph.update_yaxes(
+        showgrid=True,
+        gridcolor="#263245",
+        zeroline=False
+    )
+    
+    st.plotly_chart(
+        payoffGraph,
+        width="stretch"
+    )
+
+payoffSelector = st.segmented_control ("options",["None", "Long Call", "Long Put", "Short Call", "Short Put", "Bull Call Spread"], label_visibility="collapsed", default="None")
+
+if (payoffSelector == "None"):
+    st.markdown("""
+        <div style="
+            background-color: rgba(255, 77, 167, 0.10);
+            border: 1px solid #FF4DA7;
+            border-radius: 10px;
+            padding: 16px;
+            color: #F7F3EE;
+            text-align: center;
+        ">
+            Select an option strategy to view its payoff diagram.
+        </div>
+        """, unsafe_allow_html=True)
+
+if (payoffSelector == "Long Call"):
+    stockTimeT= np.linspace(0.5 * K, 1.5 * K, 300)
+    payoff= np.maximum (stockTimeT - K, 0) - callPriceValue
+    Breakeven = K + callPriceValue
+    createPayoffGraph(stockTimeT, payoff, payoffSelector, [K], Breakeven)
+
+elif(payoffSelector=="Long Put"):
+    stockTimeT= np.linspace(0.5 * K, 1.5 * K, 300)
+    payoff= np.maximum (K - stockTimeT, 0) - putPriceValue
+    Breakeven= K - putPriceValue
+    createPayoffGraph(stockTimeT, payoff, payoffSelector, [K], Breakeven)
+
+elif (payoffSelector=="Short Call"):
+    stockTimeT= np.linspace(0.5 * K, 1.5 * K, 300)
+    payoff= callPriceValue - np.maximum (stockTimeT - K, 0)
+    Breakeven= K + callPriceValue
+    createPayoffGraph(stockTimeT, payoff, payoffSelector, [K], Breakeven)
+
+
+elif (payoffSelector=="Short Put"):
+    stockTimeT= np.linspace(0.5 * K, 1.5 * K, 300)
+    payoff= putPriceValue - np.maximum (K - stockTimeT, 0)
+    Breakeven= K - putPriceValue
+    createPayoffGraph(stockTimeT, payoff, payoffSelector, [K], Breakeven)
+
+elif (payoffSelector=="Bull Call Spread"):
+    stockTimeT= np.linspace(0.5 * K, 1.5 * K, 300)
+    K2 = st.number_input("Enter Second Strike Price", value=K*1.1, min_value=1.00, step=0.50, format="%.2f")
+    callPriceValue_K2, _ = option_pricer(S, K2, T, r, sigma)
+    netPremium= callPriceValue - callPriceValue_K2
+
+    payoff= np.minimum(np.maximum(stockTimeT - K, 0), K2 - K) - netPremium
+    Breakeven= K + netPremium
+
+    createPayoffGraph(stockTimeT, payoff, payoffSelector, [K, K2], Breakeven)

@@ -16,5 +16,3 @@ def option_pricer(S, K, T, r, sigma):
 
     return call_price, put_price
 
-call_price, put_price = option_pricer(42,40,0.5,0.10,0.20)
-print(call_price, " ", put_price)
