@@ -4,6 +4,7 @@ import yfinance as yf
 from black_scholes import option_pricer
 from greeks import *
 import plotly.graph_objects as go
+from iv_solver import implied_volatility
 
 
 #FONT AND SIDEBAR ELEMENTS AND THEME
@@ -149,7 +150,8 @@ st.markdown("""
     <br>
     <h4 style="
         font-size: 1.25rem;
-        margin: 1.5rem 0 0.8rem 0;
+        margin: 0.2rem 0 0.6rem 0;
+        # color: #A9B4C2;
         line-height: 1.2;
     ">Option Prices</h4>
     """, unsafe_allow_html=True)
@@ -188,7 +190,8 @@ st.markdown("""
     <br>
     <h4 style="
         font-size: 1.25rem;
-        margin: 1.5rem 0 0.8rem 0;
+        # color: #A9B4C2;
+        margin: 0.2rem 0 0.6rem 0;
         line-height: 1.2;
     ">Option Greek</h4>
     """, unsafe_allow_html=True)
@@ -296,6 +299,7 @@ st.markdown("""
 <h4 style="
     font-size: 1.25rem;
     margin: 0.2rem 0 0.6rem 0;
+    # color: #A9B4C2;
     line-height: 1.2;
 ">Sensitivity Heatmap</h4>
 
@@ -440,6 +444,7 @@ st.markdown("""
 <br>
 <h4 style="
     font-size: 1.25rem;
+        # color: #A9B4C2;
     margin: 0.2rem 0 0.6rem 0;
     line-height: 1.2;
 ">Payoff Visualizer</h4>
@@ -806,3 +811,66 @@ elif(payoffSelector == "Bull Call Spread"):
                 </div>
             </div>
         """, unsafe_allow_html=True)
+
+
+#IV CALCULATOR
+st.markdown("""
+<br>
+<h4 style="
+    font-size: 1.25rem;
+    margin: 0.2rem 0 0.6rem 0;
+    # color: #A9B4C2;
+    line-height: 1.2;
+">Implied Volatility Solver</h4>
+
+<p style="
+    font-size: 1.0rem;
+    color: #A9B4C2;
+    margin: 0;
+    line-height: 1.5;
+">Enter a market-observed option price to back-calculate the implied volatility using the Black-Scholes model.</p>
+<br>
+""", unsafe_allow_html=True)
+
+optionType = st.segmented_control("Option Type",["None", "Call", "Put"], default="None", selection_mode="single", required=True)
+
+if optionType != "None":
+    ivCol1, ivCol2 = st.columns([0.8, 0.2])
+
+    with ivCol1:
+        marketPrice= st.number_input("Market Option Price (₹)", min_value=0.0, step=0.01, format="%.2f", value= (callPriceValue if optionType=="Call" else putPriceValue))
+
+    with ivCol2:
+        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        calculateIV = st.button("Calculate", use_container_width=True)
+
+    if calculateIV:
+        with st.spinner("Calculating implied volatility..."):
+            iv, iterations, error = implied_volatility(S, K, T, r, marketPrice, optionType)
+
+        if error:
+            st.error(error)
+
+        else:
+            ivValueCol1, ivValueCol2 = st.columns(2)
+
+            with ivValueCol1:
+                st.markdown(f"""
+                    <br>
+                    <div class="metric-card">
+                    <div class="metric-title">Implied Volatility</div>
+                    <div class="metric-value">{iv*100:.2f}%
+                    </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            with ivValueCol2:
+                st.markdown(f"""
+                    <br>
+                    <div class="metric-card">
+                    <div class="metric-title">Iterations</div>
+                    <div class="metric-value">{iterations:.0f}
+                    </div>
+                    </div>
+                """, unsafe_allow_html=True)
+                
