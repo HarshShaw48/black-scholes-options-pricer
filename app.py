@@ -87,19 +87,40 @@ st.markdown("""
 
 
 
-# SIDEBAR INPUT
 
+# FETCHING HISTORICAL DATA 
+@st.cache_data(ttl=3600)
+def historicalVolatility(ticker, period="3mo", window=30):
+    data = yf.download(
+        ticker,
+        period=period,
+        progress=False,
+        auto_adjust=True
+    )
+
+    close = data["Close"].iloc[:, 0]
+    returns = np.log(close / close.shift(1)).dropna()
+    histVol = returns.tail(window).std() * np.sqrt(252) * 100
+    return float(histVol)
+
+
+# SIDEBAR INPUT
 
 with st.sidebar:
     stockOption = st.segmented_control("Price Source", ["Live Market", "Manual"], required=True, default="Live Market")
 
     stockInputcol1, stockInputcol2 = st.columns([0.08, 0.92])
+    histVol = None
     with stockInputcol2:
         if(stockOption=="Live Market"):
             stock = st.text_input("Enter Stock Symbol", value="RELIANCE").strip().upper()
             try:
                 ticker = yf.Ticker(stock+".NS")
                 S = ticker.fast_info["lastPrice"]
+                histVol = historicalVolatility(stock + ".NS")
+                history = ticker.history(period="1d")
+                lastTime = history.index[-1]
+                formatted_time = lastTime.strftime("%d %b %Y, %I:%M %p")
                 if not S:
                     st.error("Stock Price is 0 or NaN. Please enter Current Stock Price MANUALLY.")
                     S = st.number_input ("Current Stock Price", value=100.00, min_value=0.00, step=0.5, format="%.2f")
@@ -110,12 +131,22 @@ with st.sidebar:
         margin: 0.2rem 0 0.6rem 0;
         line-height: 1.2;
     ">Current Price: {S:.2f}</h6>
+    <h6 style="
+            font-size: 0.82rem;
+            color: #4ADE80;
+            margin: 0 0 0.6rem 0;
+            line-height: 1.2;
+        ">As of {formatted_time}</h6>
                 """, unsafe_allow_html=True)
             except(KeyError, TypeError):
                 st.error("Invalid ticker symbol. Please enter a valid NSE symbol.")
                 S = st.number_input ("Current Stock Price MANUALLY", value=100.00, min_value=0.00, step=0.5, format="%.2f")
         else:
             S = st.number_input ("Current Stock Price", value=100.00, min_value=0.00, step=0.5, format="%.2f")
+        st.caption(
+    "This model uses the standard Black-Scholes assumptions and does not account for dividends. "
+    "Option prices for dividend-paying stocks may differ from market prices."
+)
 
     K = st.number_input("Strike Price", value=(S//100)*100, min_value=1.00, step=0.50, format="%.2f")
 
@@ -130,10 +161,17 @@ with st.sidebar:
             T = st.number_input("Time to Expiry (in days)", value=7, min_value=1, step=1)
             T = T / 365
     
-    r = st.number_input("Risk-Free Rate (in %)", min_value=0.00, value=5.00, step=0.05, max_value=20.00)
+    r = st.number_input("Risk-Free Rate (in %)", min_value=0.00, value=5.25, step=0.05, max_value=20.00)
     r=r/100
+    st.caption("Defaulted to the current RBI repo rate (5.25%). Update manually if required.")
 
-    sigma= st.number_input("Volatility (between 0 and 1)", min_value=0.01, value=0.20, step=0.01, max_value=1.00)
+    if histVol is not None:
+        sigma= st.number_input("Volatility (between 0 and 1)", min_value=0.01, value=min(max(histVol/100, 0.01), 1.00), step=0.01, max_value=1.00)
+        st.caption(f"30-Day Historical Volatility: {histVol:.2f}% or {histVol/100:.2f}")
+        st.caption("Computed from the last 30 trading days using Yahoo Finance.")
+    else:
+        sigma= st.number_input("Volatility (between 0 and 1)", min_value=0.01, value=(0.20), step=0.01, max_value=1.00)
+        st.caption("30-Day Historical Volatility unavailable.")
 
 
 #FUNCTION CALLS
@@ -233,6 +271,17 @@ with gammaColumn:
 
 thetaCallColumn, thetaPutColumn, vegaColumn = st.columns(3, gap="small")
 
+if greeksDict["theta_call"] < 0:
+    callThetaText = f"Call option loses approximately ₹{abs(greeksDict["theta_call"]):.2f}/day due to time decay."
+else:
+    callThetaText = f"Call option gains approximately ₹{greeksDict["theta_call"]:.2f}/day."
+
+if greeksDict["theta_put"] < 0:
+    putThetaText = f"Put option loses approximately ₹{abs(greeksDict["theta_put"]):.2f}/day due to time decay."
+else:
+    putThetaText = f"Put option gains approximately ₹{greeksDict["theta_put"]:.2f}/day."
+
+
 with thetaCallColumn:
     st.markdown(f"""
         <br>
@@ -241,6 +290,7 @@ with thetaCallColumn:
         <div class="metric-value">
         {greeksDict["theta_call"] :.2f}
         </div>
+        <div class="metric-title">{callThetaText}</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -252,6 +302,7 @@ with thetaPutColumn:
         <div class="metric-value">
         {greeksDict["theta_put"] :.2f}
         </div>
+        <div class="metric-title">{putThetaText}</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -437,7 +488,7 @@ heatMap.update_layout(
     )
 
 
-st.plotly_chart(heatMap, use_container_width=True)
+st.plotly_chart(heatMap, width="stretch")
 
 # PAYOFF VISUALISER
 st.markdown("""
@@ -842,7 +893,7 @@ if optionType != "None":
 
     with ivCol2:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-        calculateIV = st.button("Calculate", use_container_width=True)
+        calculateIV = st.button("Calculate", width="stretch")
 
     if calculateIV:
         with st.spinner("Calculating implied volatility..."):
@@ -873,4 +924,3 @@ if optionType != "None":
                     </div>
                     </div>
                 """, unsafe_allow_html=True)
-                
