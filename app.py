@@ -24,29 +24,29 @@ st.markdown("""
 }
             
 .metric-card {
-    padding:18px;
-    border-radius:18px;
-    background:#141D2E;
-    border:1px solid #263245;
-    transition:all .25s ease;
+    padding: 1.125rem;  
+    border-radius: 1.125rem;  
+    background: #141D2E;
+    border: 0.0625rem solid #263245;
+    transition: all .25s ease;
 }
 
 .metric-card:hover{
-    border-color:#FF4DA7;
-    box-shadow:0 0 12px rgba(255,77,167,.25);
-    transform:translateY(-2px);
+    border-color: #FF4DA7;
+    box-shadow: 0 0 0.75rem rgba(255,77,167,.25);
+    transform: translateY(-0.125rem);
 }
 
 .metric-title{
-    font-size:15px;
-    color:#A9B4C2;
-    margin-bottom:8px;
+    font-size: 0.9375rem;  
+    color: #A9B4C2;
+    margin-bottom: 0.5rem; 
 }
 
 .metric-value{
-    font-size:42px;
-    font-weight:700;
-    color:#F7F3EE;
+    font-size: 2rem;   
+    font-weight: 700;
+    color: #F7F3EE;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -146,14 +146,13 @@ greeksDict= greeksFunc(S, K, T, r, sigma)
 
 st.markdown("""
     <br>
+    <br>
     <h4 style="
         font-size: 1.25rem;
-        color: #A9B4C2;
+        # color: #A9B4C2;
         margin: 1.5rem 0 0.8rem 0;
         line-height: 1.2;
-    ">
-    Option Prices
-    </h4>
+    ">Option Prices</h4>
     """, unsafe_allow_html=True)
 
 
@@ -187,9 +186,10 @@ with optionPriceCol2:
 
 st.markdown("""
     <br>
+    <br>
     <h4 style="
         font-size: 1.25rem;
-        color: #A9B4C2;
+        # color: #A9B4C2;
         margin: 1.5rem 0 0.8rem 0;
         line-height: 1.2;
     ">Option Greek</h4>
@@ -292,9 +292,10 @@ with rhoPut:
 
 # PAYOFF VISUALISER
 st.markdown("""
+<br>
 <h4 style="
     font-size: 1.25rem;
-    color: #A9B4C2;
+    # color: #A9B4C2;
     margin: 0.2rem 0 0.6rem 0;
     line-height: 1.2;
 ">Strategy Selector</h4>
@@ -470,3 +471,204 @@ elif (payoffSelector=="Bull Call Spread"):
     Breakeven= K + netPremium
 
     createPayoffGraph(stockTimeT, payoff, payoffSelector, [K, K2], Breakeven)
+
+##METRIC CHART
+
+if (payoffSelector != "None"):
+    st.markdown("""
+    <br>
+    <h4 style="
+        font-size: 1.25rem;
+        # color: #A9B4C2;
+        margin: 0.2rem 0 0.6rem 0;
+        line-height: 1.2;
+    ">Payoff Summary</h4>
+
+    <p style="
+        font-size: 1.0rem;
+        color: #A9B4C2;
+        margin: 0;
+        line-height: 1.5;
+    ">Key risk and reward levels for your selected strategy at expiration.</p>
+    <br>
+    """, unsafe_allow_html=True)
+
+if(payoffSelector == "Long Call"):
+    longCallCard1, longCallCard2, longCallCard3 = st.columns(3, gap="small")
+
+    with longCallCard1:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Profit</div>
+                <div class="metric-value">
+                Unlimited
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with longCallCard2:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Loss</div>
+                <div class="metric-value">
+                {callPriceValue:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with longCallCard3:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Breakeven</div>
+                <div class="metric-value">
+                {Breakeven:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+elif(payoffSelector == "Long Put"):
+    longPutCard1, longPutCard2, longPutCard3 = st.columns(3, gap="small")
+
+    with longPutCard1:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Profit</div>
+                <div class="metric-value">
+                {K - putPriceValue:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with longPutCard2:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Loss</div>
+                <div class="metric-value">
+                {putPriceValue:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with longPutCard3:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Breakeven</div>
+                <div class="metric-value">
+                {Breakeven:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+elif(payoffSelector == "Short Call"):
+    shortCallCard1, shortCallCard2, shortCallCard3 = st.columns(3, gap="small")
+
+    with shortCallCard1:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Profit</div>
+                <div class="metric-value">
+                {callPriceValue:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with shortCallCard2:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Loss</div>
+                <div class="metric-value">
+                Unlimited
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with shortCallCard3:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Breakeven</div>
+                <div class="metric-value">
+                {Breakeven:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+elif(payoffSelector == "Short Put"):
+    shortPutCard1, shortPutCard2, shortPutCard3 = st.columns(3, gap="small")
+
+    with shortPutCard1:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Profit</div>
+                <div class="metric-value">
+                {putPriceValue:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with shortPutCard2:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Loss</div>
+                <div class="metric-value">
+                Unlimited
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with shortPutCard3:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Breakeven</div>
+                <div class="metric-value">
+                {Breakeven:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+elif(payoffSelector == "Bull Call Spread"):
+    bullCallCard1, bullCallCard2, bullCallCard3 = st.columns(3, gap="small")
+
+    with bullCallCard1:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Profit</div>
+                <div class="metric-value">
+                {(K2-K-netPremium):.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with bullCallCard2:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Max Loss</div>
+                <div class="metric-value">
+                {(netPremium):.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with bullCallCard3:
+        st.markdown(f"""
+            <br>
+            <div class="metric-card">
+                <div class="metric-title">Breakeven</div>
+                <div class="metric-value">
+                {Breakeven:.2f}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
