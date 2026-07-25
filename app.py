@@ -924,3 +924,71 @@ if optionType != "None":
                     </div>
                     </div>
                 """, unsafe_allow_html=True)
+
+st.markdown("""
+<br>
+<div style="
+    background-color:#FF4DA71A;
+    border:1px solid #FF4DA7;
+    border-radius:10px;
+    padding:20px;
+    color:#F7F3EE;
+">
+
+<h2 style="
+    color:#FF4DA7;
+    text-align:center;
+    margin-top:0;
+    margin-bottom:1rem;
+">
+About VScholes
+</h2>
+
+<p style="
+    font-size:1rem;
+    line-height:1.8;
+    text-align:justify;
+    margin-bottom:1rem;
+">
+<b>VScholes</b> was built by <span style="color:#FF4DA7;"><b>Harsh Shaw</b></span>, a Computer Science student at
+<b>Techno India University, Kolkata</b>, as part of a self learning journey into
+quantitative finance. The project implements Black-Scholes option pricing, Greeks, implied volatility, and payoff analysis from scratch using
+<b>Python, NumPy, SciPy, and Streamlit</b>.
+</p>
+
+<p style="
+    font-size:1rem;
+    line-height:1.8;
+    text-align:justify;
+    margin-bottom:1rem;
+">
+This is the second project in a series focused on quantitative finance and derivatives.
+The next project explores implied volatility surfaces and term structure using live
+options chain data.
+</p>
+
+<p style="
+    text-align:center;
+    font-size:0.96rem;
+    margin-bottom:1.6rem;
+">
+<b>LinkedIn:</b>
+<a href="https://www.linkedin.com/in/harsh-shaw-111330248/"
+target="_blank"
+style="color:#FF4DA7; text-decoration:none; font-weight:600;">
+linkedin.com/in/harsh-shaw-111330248
+</a>
+</p>
+
+<p style="
+    text-align:center;
+    color:#B8B8B8;
+    font-style:italic;
+    font-size:0.92rem;
+    margin:0;
+">
+Special thanks to <span style="color:#FF4DA7;"><b>Vindhya Saha</b></span> for her constant support and encouragement throughout this journey.
+</p>
+
+</div>
+""", unsafe_allow_html=True)
