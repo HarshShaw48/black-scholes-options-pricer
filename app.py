@@ -298,7 +298,7 @@ st.markdown("""
     # color: #A9B4C2;
     margin: 0.2rem 0 0.6rem 0;
     line-height: 1.2;
-">Strategy Selector</h4>
+">Payoff Visualizer</h4>
 
 <p style="
     font-size: 1.0rem;
