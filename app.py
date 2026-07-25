@@ -149,7 +149,6 @@ st.markdown("""
     <br>
     <h4 style="
         font-size: 1.25rem;
-        # color: #A9B4C2;
         margin: 1.5rem 0 0.8rem 0;
         line-height: 1.2;
     ">Option Prices</h4>
@@ -189,7 +188,6 @@ st.markdown("""
     <br>
     <h4 style="
         font-size: 1.25rem;
-        # color: #A9B4C2;
         margin: 1.5rem 0 0.8rem 0;
         line-height: 1.2;
     ">Option Greek</h4>
@@ -290,12 +288,158 @@ with rhoPut:
         <br>
     """, unsafe_allow_html=True)
 
+
+# HEATMAP
+
+st.markdown("""
+<br>
+<h4 style="
+    font-size: 1.25rem;
+    margin: 0.2rem 0 0.6rem 0;
+    line-height: 1.2;
+">Sensitivity Heatmap</h4>
+
+<p style="
+    font-size: 1.0rem;
+    color: #A9B4C2;
+    margin: 0;
+    line-height: 1.5;
+">Explore how option prices shift across a range of spot prices and volatilities.</p>
+<br>
+""", unsafe_allow_html=True)
+
+heatmapType = st.segmented_control ("options",["Call", "Put"], label_visibility="collapsed", default="Call", selection_mode="single", required=True)
+
+
+spotPrices = np.round(np.linspace(0.70*S, 1.30*S, 20),4)
+volatilities= np.round(np.linspace(0.05, 0.80, 20),4)
+
+prices=[]
+for j in volatilities:
+    currentRow=[]
+    for i in spotPrices:
+        X,Y=option_pricer(i, K, T, r, j)
+        if(heatmapType=="Call"):
+            currentRow.append(X)
+        else:
+            currentRow.append(Y)
+    prices.append(currentRow)
+
+heatMap= go.Figure()
+
+heatMap.add_trace(go.Heatmap(x= spotPrices, y= volatilities, z= prices, colorscale="Plasma", 
+colorbar=dict(title=f"{heatmapType} Price (₹)", thickness=18, len=0.8), 
+hovertemplate=
+f"<b>Underlying Price</b>: ₹%{{x:.2f}}<br>"
+f"<b>Volatility</b>: %{{y:.1%}}<br>"
+f"<b>{heatmapType} Price</b>: ₹%{{z:.2f}}"
+"<extra></extra>", xgap=1, ygap=1))
+
+heatMap.add_trace(
+    go.Scatter(
+        x=[K, K],
+        y=[volatilities.min(), volatilities.max()],
+        mode="lines",
+        line=dict(
+            color="#FF4DA7",
+            width=2.5,
+            dash="dash"
+        ),
+        opacity=1,
+        name="Strike Price"
+    )
+)
+
+heatMap.add_trace(
+    go.Scatter(
+        x=[S, S],
+        y=[volatilities.min(), volatilities.max()],
+        mode="lines",
+        line=dict(
+            color="#4ADE80",
+            width=2
+        ),
+        name="Spot Price"
+    )
+)
+
+heatMap.add_annotation(
+    x=K,
+    y=volatilities.max(),
+    text=f"Strike (₹{K:.2f})",
+    showarrow=True,
+    arrowhead=2,
+    arrowsize=1,
+    arrowwidth=2,
+    arrowcolor="#FF4DA7",
+    ax=0,
+    ay=-35,
+    bgcolor="#141D2E",
+    bordercolor="#FF4DA7",
+    borderwidth=1,
+    font=dict(
+        color="#F7F3EE",
+        size=12
+    )
+)
+
+heatMap.add_annotation(
+    x=S,
+    y=volatilities.max(),
+    text=f"Spot (₹{S:.2f})",
+    showarrow=True,
+    arrowhead=2,
+    arrowsize=1,
+    arrowwidth=2,
+    arrowcolor="#4ADE80",
+    ax=65,
+    ay=-10,
+    bgcolor="#141D2E",
+    bordercolor="#4ADE80",
+    borderwidth=1,
+    font=dict(
+        color="#F7F3EE",
+        size=12
+    )
+)
+
+heatMap.update_layout(
+    xaxis_title="Underlying Price (₹)",
+    yaxis_title="Volatility (σ)", 
+    title=f"{heatmapType} Price Sensitivity Heatmap",
+    height=550,
+    xaxis=dict(
+        showgrid=False,
+        zeroline=False,
+        title="Underlying Price (₹)"
+    ),
+    yaxis=dict(
+        showgrid=False,
+        zeroline=False,
+        title="Volatility (σ)",
+        tickformat=".0%"
+    ),
+    margin=dict(
+        l=40,
+        r=20,
+        t=60,
+        b=40
+    ),
+    paper_bgcolor="#0B1220",
+    plot_bgcolor="#0B1220",
+    font=dict(
+        color="#F7F3EE"
+    )
+    )
+
+
+st.plotly_chart(heatMap, use_container_width=True)
+
 # PAYOFF VISUALISER
 st.markdown("""
 <br>
 <h4 style="
     font-size: 1.25rem;
-    # color: #A9B4C2;
     margin: 0.2rem 0 0.6rem 0;
     line-height: 1.2;
 ">Payoff Visualizer</h4>
@@ -323,16 +467,6 @@ def createPayoffGraph (stockTimeT, payoff, stratergyName, strikes=None, breakEve
     
     payoffGraph.add_hline( y=0, line_dash="dash", line_color="#A9B4C2", opacity=0.7
         )
-    
-    # if strikes is not None:
-    #     for i, strike in enumerate(strikes, start=1):
-    #         payoffGraph.add_vline(
-    #             x=strike,
-    #             line_dash="dot",
-    #             line_color="#4ADE80",
-    #             annotation_text=f"Strike {i}",
-    #             annotation_position="top"
-    #         )
 
     y_min = payoff.min()
     y_max = payoff.max()
@@ -420,7 +554,7 @@ def createPayoffGraph (stockTimeT, payoff, stratergyName, strikes=None, breakEve
         width="stretch"
     )
 
-payoffSelector = st.segmented_control ("options",["None", "Long Call", "Long Put", "Short Call", "Short Put", "Bull Call Spread"], label_visibility="collapsed", default="None")
+payoffSelector = st.segmented_control ("options",["None", "Long Call", "Long Put", "Short Call", "Short Put", "Bull Call Spread"], label_visibility="collapsed", default="None", required=True)
 
 if (payoffSelector == "None"):
     st.markdown("""
