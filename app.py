@@ -952,7 +952,7 @@ About VScholes
 ">
 <b>VScholes</b> was built by <span style="color:#FF4DA7;"><b>Harsh Shaw</b></span>, a Computer Science student at
 <b>Techno India University, Kolkata</b>, as part of a self learning journey into
-quantitative finance. The project implements Black-Scholes option pricing, Greeks, implied volatility, and payoff analysis from scratch using
+fin-tech. The project implements Black-Scholes option pricing, Greeks, implied volatility, and payoff analysis from scratch using
 <b>Python, NumPy, SciPy, and Streamlit</b>.
 </p>
 
