@@ -23,7 +23,14 @@ st.markdown("""
 [data-testid="stSidebarCollapseButton"] {
     display: none;
 }
-            
+
+[data-testid="stIconMaterial"] {
+    font-family: "Material Symbols Rounded" !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-size: 24px;
+}
+
 .metric-card {
     padding: 1.125rem;  
     border-radius: 1.125rem;  
